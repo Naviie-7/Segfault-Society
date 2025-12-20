@@ -1,33 +1,54 @@
-function triggerIntervention() {
-    const glow = document.getElementById('twin-glow');
-    const icon = document.getElementById('twin-icon');
-    const title = document.getElementById('status-title');
-    const desc = document.getElementById('status-desc');
-    const bar = document.getElementById('budget-bar');
+// script.js
 
-    if (title.innerText === "Budget Synced") {
-        // High Risk State: Predicting a splurge
-        glow.classList.add('risk-high');
-        icon.classList.replace('text-green-500', 'text-red-500');
+function runScenario(type) {
+    const glow = document.getElementById('twin-glow');
+    const core = document.getElementById('twin-core');
+    const icon = document.getElementById('twin-icon');
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+    const predictionMsg = document.getElementById('prediction-msg');
+    const riskPercent = document.getElementById('risk-percent');
+    const card = document.getElementById('insight-card');
+
+    if (type === 'risk') {
+        // TRIGGER INTERVENTION
+        glow.className = "absolute w-64 h-64 bg-rose-500 rounded-full glow-warning transition-all duration-1000";
+        core.style.borderColor = "#f43f5e";
+        core.style.boxShadow = "0 0 40px rgba(244, 63, 94, 0.4)";
+        icon.style.color = "#f43f5e";
         
-        title.innerText = "High Spending Risk";
-        title.classList.replace('text-green-400', 'text-red-500');
+        statusDot.className = "h-2 w-2 bg-rose-500 rounded-full animate-ping";
+        statusText.innerText = "Intervention Active";
+        statusText.className = "text-xs font-bold text-rose-500 uppercase tracking-widest";
         
-        desc.innerText = "Pattern Detected: You usually spend $50+ at bars on Friday nights. Your Twin suggests setting a $20 'Cash Only' limit tonight.";
+        predictionMsg.innerText = "Pattern Detected: You are near 'The Coffee House' at a high-stress time. Prediction: ₹250 impulsive splurge. Action: Drink the water in your bag.";
         
-        bar.classList.replace('bg-green-500', 'bg-red-500');
-        bar.style.width = "85%"; // Show budget nearly blown
+        riskPercent.innerText = "88%";
+        riskPercent.className = "text-xl font-bold text-rose-500";
+        
+        card.classList.add('risk-border');
+        
     } else {
-        // Reset to Healthy State
-        glow.classList.remove('risk-high');
-        icon.classList.replace('text-red-500', 'text-green-500');
+        // RESET TO SAFE
+        glow.className = "absolute w-64 h-64 bg-emerald-500 rounded-full blur-[80px] opacity-20 glow-stable transition-all duration-1000";
+        core.style.borderColor = "#10b981";
+        core.style.boxShadow = "0 0 30px rgba(16,185,129,0.2)";
+        icon.style.color = "#10b981";
         
-        title.innerText = "Budget Synced";
-        title.classList.replace('text-red-500', 'text-green-400');
+        statusDot.className = "h-2 w-2 bg-emerald-500 rounded-full animate-pulse";
+        statusText.innerText = "Model Stable";
+        statusText.className = "text-xs font-bold text-emerald-500 uppercase tracking-widest";
         
-        desc.innerText = "The twin is currently stable. Your spending patterns are aligned with your 'Savings Goal'.";
+        predictionMsg.innerText = "Your spending patterns are currently optimized for your ₹10000 savings goal.";
         
-        bar.classList.replace('bg-red-500', 'bg-green-500');
-        bar.style.width = "30%";
+        riskPercent.innerText = "2%";
+        riskPercent.className = "text-xl font-bold text-emerald-500";
+        
+        card.classList.remove('risk-border');
     }
 }
+
+// Initialize breathing on load
+window.onload = () => {
+    document.getElementById('twin-glow').classList.add('glow-stable');
+};

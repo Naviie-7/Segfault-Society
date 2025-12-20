@@ -3,35 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Twin | Habit Hackathon</title>
-    
+    <title>FinanceTwin MVP</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
-<body class="bg-slate-900 text-white min-h-screen">
+<body class="bg-slate-950 text-slate-50 font-['Inter']">
 
-<div class="w-full max-w-sm bg-slate-800 rounded-3xl p-6 border border-slate-700 shadow-xl">
-    <div class="flex justify-between items-start mb-4">
-        <div>
-            <h2 id="status-title" class="text-2xl font-bold text-green-400">Budget Synced</h2>
-            <p id="status-desc" class="text-slate-400 text-sm mt-1">Twin predicts 95% chance of staying under budget today.</p>
+    <div class="max-w-md mx-auto min-h-screen flex flex-col p-6 pb-32">
+        
+        <header class="flex justify-between items-center py-4 mb-8">
+            <div>
+                <h1 class="text-xl font-800 tracking-tighter italic">FINANCE<span class="text-indigo-500">TWIN</span></h1>
+                <p class="text-xs text-slate-500 font-medium uppercase tracking-widest">Digital Model v1.0</p>
+            </div>
+            <div class="h-10 w-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center">
+                <span class="text-xs">JD</span>
+            </div>
+        </header>
+
+        <div class="relative flex justify-center items-center py-10">
+            <div id="twin-glow" class="absolute w-64 h-64 bg-emerald-500 rounded-full blur-[80px] opacity-20 transition-all duration-1000"></div>
+            <div id="twin-core" class="relative z-10 w-32 h-32 bg-slate-900 rounded-full border-2 border-emerald-500 flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all duration-500">
+                <svg id="twin-icon" class="w-12 h-12 text-emerald-500 transition-colors duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+            </div>
         </div>
-        <div id="balance-display" class="text-right">
-            <span class="text-xs text-slate-500 uppercase">Remaining</span>
-            <p class="text-xl font-mono font-bold">₹10000.00</p>
+
+        <div id="insight-card" class="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 backdrop-blur-md mb-6">
+            <div class="flex items-center gap-2 mb-3">
+                <span id="status-dot" class="h-2 w-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span id="status-text" class="text-xs font-bold text-emerald-500 uppercase tracking-widest">Model Stable</span>
+            </div>
+            <h2 id="prediction-msg" class="text-lg font-semibold leading-tight">Your spending patterns are currently optimized for your ₹10000 savings goal.</h2>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+                <p class="text-slate-500 text-xs mb-1">Daily Budget</p>
+                <p class="text-xl font-bold">₹5000.00</p>
+            </div>
+            <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+                <p class="text-slate-500 text-xs mb-1">Risk Level</p>
+                <p id="risk-percent" class="text-xl font-bold text-emerald-500">2%</p>
+            </div>
+        </div>
+
+        <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-xs bg-white/10 backdrop-blur-xl border border-white/20 p-2 rounded-2xl flex gap-2">
+            <button onclick="runScenario('safe')" class="flex-1 py-2 text-xs font-bold rounded-lg hover:bg-white/10 transition">Reset</button>
+            <button onclick="runScenario('risk')" class="flex-1 py-2 bg-indigo-600 text-xs font-bold rounded-lg hover:bg-indigo-500 transition">Test Risk</button>
         </div>
     </div>
-    
-    <div class="w-full bg-slate-700 h-2 rounded-full mb-6 overflow-hidden">
-        <div id="budget-bar" class="bg-green-500 h-full w-[30%] transition-all duration-1000"></div>
-    </div>
-
-    <button onclick="triggerIntervention()" class="w-full bg-indigo-600 py-3 rounded-xl font-bold hover:bg-indigo-500 transition shadow-lg shadow-indigo-500/20">
-        Simulate Weekend Pattern
-    </button>
-</div>
 
     <script src="script.js"></script>
 </body>
-</html>

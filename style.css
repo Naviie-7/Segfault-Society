@@ -1,94 +1,36 @@
-/* style.css */
-
-/* 1. Root Variables for easy color changes */
-:root {
-    --bg-dark: #0f172a;
-    --card-bg: #1e293b;
-    --accent-green: #22c55e;
-    --accent-red: #ef4444;
-    --accent-indigo: #6366f1;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-}
-
-/* 2. Global Resets */
+/* Custom animations for the Digital Twin */
 body {
-    background-color: var(--bg-dark);
-    color: var(--text-main);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    margin: 0;
-    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* 3. The Digital Twin Pulsing Glow */
-.twin-pulse {
-    transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+/* Stable breathing animation */
+.glow-stable {
+    animation: breathe 4s infinite ease-in-out;
 }
 
-@keyframes pulse-green {
-    0%, 100% { transform: scale(1); opacity: 0.4; box-shadow: 0 0 20px rgba(34, 197, 94, 0.2); }
-    50% { transform: scale(1.1); opacity: 0.6; box-shadow: 0 0 50px rgba(34, 197, 94, 0.4); }
+/* High risk warning animation */
+.glow-warning {
+    background-color: #f43f5e !important; /* Rose-500 */
+    animation: panic 0.6s infinite ease-in-out;
+    opacity: 0.6 !important;
 }
 
-@keyframes pulse-red {
-    0%, 100% { transform: scale(1.1); opacity: 0.7; box-shadow: 0 0 30px rgba(239, 68, 68, 0.4); }
-    50% { transform: scale(1.25); opacity: 1; box-shadow: 0 0 60px rgba(239, 68, 68, 0.6); }
+@keyframes breathe {
+    0%, 100% { transform: scale(1); opacity: 0.2; }
+    50% { transform: scale(1.1); opacity: 0.3; }
 }
 
-/* Applying animations via classes triggered by JS */
-.status-stable {
-    animation: pulse-green 4s infinite ease-in-out;
+@keyframes panic {
+    0%, 100% { transform: scale(1.1); filter: blur(60px); }
+    50% { transform: scale(1.3); filter: blur(90px); }
 }
 
-.status-warning {
-    animation: pulse-red 0.8s infinite ease-in-out;
-    background-color: var(--accent-red) !important;
+/* Card transition effect */
+#insight-card {
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* 4. Glassmorphism Card Effect */
-.glass-card {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: transform 0.3s ease, border-color 0.3s ease;
-}
-
-.glass-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(255, 255, 255, 0.2);
-}
-
-/* 5. Custom Button Shine */
-.btn-primary {
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-primary::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-    transform: rotate(45deg);
-    transition: 0.5s;
-}
-
-.btn-primary:hover::after {
-    left: 120%;
-}
-
-/* 6. Typography Helpers */
-.text-gradient-green {
-    background: linear-gradient(to right, #4ade80, #22c55e);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.text-gradient-red {
-    background: linear-gradient(to right, #f87171, #ef4444);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.risk-border {
+    border-color: rgba(244, 63, 94, 0.5) !important;
+    background: rgba(244, 63, 94, 0.05) !important;
 }
