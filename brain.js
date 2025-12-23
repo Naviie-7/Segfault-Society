@@ -1,129 +1,190 @@
-/* FINANCE TWIN - UNIVERSAL FIX */
+/* FINANCE TWIN - LOGIC CORE */
 
-// 1. LEADER'S SIMULATION (Context & Visuals)
-let context = { mood: 'happy', location: 'home', budget: 300 };
-
-function updateContext(key, value, element = null) {
-    context[key] = value;
-    if (key === 'mood' && element) {
-        document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('border-blue-500', 'bg-blue-900/10'));
-        element.classList.add('border-blue-500', 'bg-blue-900/10');
+// Global State
+let state = {
+    mood: "Neutral",
+    location: "Home",
+    balance: 0,
+    imageBase64: null,
+    historyData: {
+        "current": { inc: 5000, spent: 2000 },
+        "last": { inc: 4800, spent: 2500 },
+        "2ago": { inc: 5200, spent: 1500 },
+        "3ago": { inc: 4500, spent: 3000 }
     }
-    if (key === 'budget') {
-        const display = document.getElementById('budget-display');
-        if(display) display.innerText = `Remaining Budget: ₹${parseFloat(value).toFixed(2)}`;
-    }
-    runSync();
-}
+};
 
-function runSync() {
-    const glow = document.getElementById('twin-glow');
-    const core = document.getElementById('twin-core');
-    const icon = document.getElementById('twin-icon');
-    const label = document.getElementById('risk-label');
-    const msg = document.getElementById('prediction-msg');
-    
-    // Safety check - if elements don't exist yet, stop
-    if(!glow || !core || !icon) return;
+let cameraStream = null;
 
-    let riskScore = 5; 
-    if (context.mood === 'stressed') riskScore += 45;
-    if (context.mood === 'bored') riskScore += 25;
-    if (context.location === 'mall') riskScore += 30;
-    if (context.location === 'online') riskScore += 20;
+// --- 1. INITIALIZATION & FINANCIALS ---
+window.onload = function() {
+    calculateWallet();
+};
 
-    // Reset basics
-    glow.className = "absolute w-48 h-48 rounded-full transition-all duration-700";
-    
-    if (riskScore >= 70) {
-        glow.classList.add('pulse-risk');
-        core.style.borderColor = "#ef4444";
-        icon.className = "fa-solid fa-triangle-exclamation text-4xl text-red-500";
-        label.innerText = "CRITICAL RISK";
-        label.className = "text-[10px] font-black uppercase tracking-[0.3em] text-red-500";
-    } else if (riskScore >= 35) {
-        glow.classList.add('pulse-warning');
-        core.style.borderColor = "#f59e0b";
-        icon.className = "fa-solid fa-circle-exclamation text-4xl text-amber-500";
-        label.innerText = "RISK WARNING";
-        label.className = "text-[10px] font-black uppercase tracking-[0.3em] text-amber-500";
-    } else {
-        glow.classList.add('pulse-stable', 'bg-blue-500', 'blur-[70px]', 'opacity-10');
-        core.style.borderColor = "rgba(59, 130, 246, 0.5)";
-        icon.className = "fa-solid fa-fingerprint text-4xl text-blue-400";
-        label.innerText = "MODEL STABLE";
-        label.className = "text-[10px] font-black uppercase tracking-[0.3em] text-blue-400";
+function updateHistory(period) {
+    const data = state.historyData[period];
+    if(data) {
+        document.getElementById('incomeInput').value = data.inc;
+        document.getElementById('spentInput').value = data.spent;
+        calculateWallet();
     }
 }
 
-// 2. THE AI BRAIN (Universal Connector)
-async function interceptImpulse() {
-    const fileInput = document.getElementById('imageInput');
-    const label = document.getElementById('risk-label');
-    const msg = document.getElementById('prediction-msg');
-    const alertBox = document.getElementById('intervention-alert');
+function calculateWallet() {
+    const inc = parseFloat(document.getElementById('incomeInput').value) || 0;
+    const spt = parseFloat(document.getElementById('spentInput').value) || 0;
+    state.balance = inc - spt;
+    
+    const display = document.getElementById('walletDisplay');
+    display.innerText = `₹${state.balance}`;
+    
+    // Visual Color Change for Low Balance
+    if(state.balance < 0) display.className = "text-lg font-bold text-red-500 font-mono";
+    else if(state.balance < 1000) display.className = "text-lg font-bold text-amber-500 font-mono";
+    else display.className = "text-lg font-bold text-emerald-400 font-mono";
+}
 
-    // 1. Get Key
-    const API_KEY = document.getElementById('apiKeyInput').value.trim();
-    if (!API_KEY) { alert("⚠️ Please paste your API Key first!"); return; }
+// --- 2. CONTEXT MANAGEMENT ---
+function setMood(mood, btn) {
+    state.mood = mood;
+    // UI Update
+    document.querySelectorAll('.mood-btn').forEach(b => {
+        b.classList.remove('active');
+        b.classList.add('text-slate-500');
+    });
+    btn.classList.add('active');
+    btn.classList.remove('text-slate-500');
+}
 
-    // 2. Check Image
-    if (!fileInput.files.length) { alert("⚠️ Upload an image!"); return; }
+// --- 3. CAMERA & IMAGE HANDLING ---
+function handleFileSelect(input) {
+    const display = document.getElementById('fileNameDisplay');
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        display.textContent = `Selected: ${file.name}`;
+        display.classList.remove('opacity-0');
+        
+        // Convert to Base64
+        const reader = new FileReader();
+        reader.onload = () => {
+            state.imageBase64 = reader.result.split(',')[1];
+        };
+        reader.readAsDataURL(file);
+    }
+}
 
-    // 3. UI Loading
-    label.innerText = "SEARCHING...";
-    label.className = "text-[10px] font-black uppercase tracking-[0.3em] text-blue-400 animate-pulse";
-    msg.innerText = "Contacting Gemini Cloud...";
+async function openCamera() {
+    const modal = document.getElementById('camera-modal');
+    const video = document.getElementById('camera-feed');
+    modal.classList.remove('hidden');
 
     try {
-        const file = fileInput.files[0];
-        const base64Data = await convertToBase64(file);
-        
-        // --- THE FIX: Try 3 Models ---
-        const models = ["gemini-1.5-flash", "gemini-1.5-flash-001", "gemini-pro-vision"];
-        let result = null;
-        let lastError = "";
-
-        for (const model of models) {
-            try {
-                console.log(`Attempting connection to: ${model}`);
-                result = await callGeminiAPI(model, API_KEY, base64Data, file.type, context.budget);
-                if (result) break; // It worked! Stop looping.
-            } catch (e) {
-                console.warn(`${model} failed: ${e.message}`);
-                lastError = e.message;
-            }
-        }
-
-        if (!result) throw new Error("All models failed. " + lastError);
-
-        // 4. Success! Update UI
-        updateUI(result);
-
-    } catch (error) {
-        console.error(error);
-        label.innerText = "ERROR";
-        msg.innerText = error.message;
-        alert("AI Error: " + error.message);
+        cameraStream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "environment" } 
+        });
+        video.srcObject = cameraStream;
+    } catch (err) {
+        alert("Could not access camera. Please allow permissions.");
+        closeCamera();
     }
 }
 
-// Helper: Call API
-async function callGeminiAPI(modelName, apiKey, base64Data, mimeType, currentBudget) {
+function closeCamera() {
+    const modal = document.getElementById('camera-modal');
+    modal.classList.add('hidden');
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+    }
+}
+
+function capturePhoto() {
+    const video = document.getElementById('camera-feed');
+    const canvas = document.getElementById('camera-canvas');
+    const display = document.getElementById('fileNameDisplay');
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    
+    // Save Data
+    const dataUrl = canvas.toDataURL('image/jpeg');
+    state.imageBase64 = dataUrl.split(',')[1];
+    
+    // UI Update
+    display.textContent = "Image Captured via Camera";
+    display.classList.remove('opacity-0');
+    
+    closeCamera();
+}
+
+// --- 4. AI ANALYSIS LOGIC ---
+async function runAnalysis() {
+    // 1. Inputs
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    state.location = document.getElementById('locationSelect').value;
+    
+    // 2. Validation
+    if (!apiKey) { alert("Please enter your Gemini API Key."); return; }
+    if (!state.imageBase64) { alert("Please upload an image or use the camera."); return; }
+
+    // 3. UI Loading State
+    const glow = document.getElementById('twin-glow');
+    const icon = document.getElementById('twin-icon');
+    const label = document.getElementById('verdict-label');
+    const msg = document.getElementById('prediction-msg');
+    const feedback = document.getElementById('feedback-section');
+
+    feedback.classList.add('hidden'); // Hide feedback on new run
+    label.innerText = "ANALYZING...";
+    label.className = "text-[10px] font-black uppercase tracking-[0.4em] text-blue-400 animate-pulse";
+    glow.className = "absolute w-64 h-64 bg-blue-500 rounded-full blur-[80px] opacity-40 animate-pulse";
+    icon.className = "fa-solid fa-spinner fa-spin text-5xl text-blue-400";
+    msg.innerHTML = "Consulting neural network...";
+
+    // 4. Prompt Construction
     const prompt = `
-    Role: Financial Guardian. User Budget: ₹${currentBudget}.
-    Task: Identify item. Estimate Price (Rupees).
-    Logic: If Price > ${currentBudget}, verdict DENIED. Else APPROVED.
-    Output JSON: { "product_name": "str", "estimated_price": int, "verdict": "APPROVED" or "DENIED", "roast": "str" }
+    Role: You are a witty, sarcastic financial advisor.
+    Context:
+    - User Wallet Balance: ₹${state.balance}
+    - User Mood: ${state.mood}
+    - Location: ${state.location}
+    
+    Task:
+    1. Identify the item in the image.
+    2. Estimate price in INR (₹).
+    3. Compare Price vs Balance.
+    4. If Price > Balance: Verdict "DENIED". Roast them.
+    5. If Price < Balance but Mood is 'Impulsive' or 'Stressed': Verdict "WARNING". Be skeptical.
+    6. If Price < Balance and safe: Verdict "APPROVED". Be cheeky.
+
+    Output JSON ONLY:
+    { "product_name": "str", "estimated_price": int, "verdict": "APPROVED" | "WARNING" | "DENIED", "roast": "str" }
     `;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+    try {
+        // 5. API Call
+        const result = await callGemini(apiKey, prompt, state.imageBase64);
+        
+        // 6. Update UI
+        updateResultUI(result);
+        
+    } catch (err) {
+        console.error(err);
+        label.innerText = "ERROR";
+        label.className = "text-red-500 font-bold";
+        msg.innerText = "System Failure: " + err.message;
+        icon.className = "fa-solid fa-bug text-red-500";
+    }
+}
+
+async function callGemini(key, prompt, image) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
     
     const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mimeType, data: base64Data } }] }]
+            contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: image } }] }]
         })
     });
 
@@ -135,45 +196,54 @@ async function callGeminiAPI(modelName, apiKey, base64Data, mimeType, currentBud
     return JSON.parse(text);
 }
 
-// Helper: Update UI
-function updateUI(result) {
+function updateResultUI(data) {
     const glow = document.getElementById('twin-glow');
-    const core = document.getElementById('twin-core');
     const icon = document.getElementById('twin-icon');
-    const label = document.getElementById('risk-label');
+    const label = document.getElementById('verdict-label');
     const msg = document.getElementById('prediction-msg');
-    const rate = document.getElementById('fail-rate');
-    const spend = document.getElementById('predicted-spend');
+    const feedback = document.getElementById('feedback-section');
 
-    if (result.verdict === "DENIED") {
-        glow.className = "absolute w-48 h-48 rounded-full pulse-risk";
-        core.style.borderColor = "#ef4444";
-        icon.className = "fa-solid fa-ban text-4xl text-red-500";
-        label.innerText = "BLOCKED";
-        label.className = "text-[10px] font-black uppercase tracking-[0.3em] text-red-500";
-        rate.innerText = "100%";
-        rate.className = "text-4xl font-bold text-red-500";
-    } else {
-        glow.className = "absolute w-48 h-48 rounded-full pulse-stable bg-blue-500 blur-[70px] opacity-10";
-        core.style.borderColor = "#10b981";
-        icon.className = "fa-solid fa-check text-4xl text-emerald-500";
-        label.innerText = "APPROVED";
-        label.className = "text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500";
-        rate.innerText = "0%";
-        rate.className = "text-4xl font-bold text-emerald-500";
+    // Colors
+    let colorClass = "text-emerald-500";
+    let glowClass = "bg-emerald-500 opacity-30 pulse-stable";
+    let iconClass = "fa-check";
+
+    if (data.verdict === "DENIED") {
+        colorClass = "text-red-500";
+        glowClass = "bg-red-600 opacity-40 pulse-risk";
+        iconClass = "fa-ban";
+    } else if (data.verdict === "WARNING") {
+        colorClass = "text-amber-500";
+        glowClass = "bg-amber-500 opacity-40 pulse-warning";
+        iconClass = "fa-triangle-exclamation";
     }
-    
-    msg.innerHTML = `<b style="color:white">${result.product_name}</b> (₹${result.estimated_price})<br><i>"${result.roast}"</i>`;
-    spend.innerText = `₹${result.estimated_price}`;
+
+    // Apply
+    glow.className = `absolute w-64 h-64 rounded-full blur-[80px] ${glowClass}`;
+    icon.className = `fa-solid ${iconClass} text-5xl ${colorClass}`;
+    label.className = `text-[10px] font-black uppercase tracking-[0.4em] ${colorClass}`;
+    label.innerText = data.verdict;
+
+    msg.innerHTML = `
+        <strong class="text-white text-lg block mb-1">${data.product_name}</strong>
+        <span class="text-xs text-slate-500 uppercase tracking-widest block mb-4">Est. Price: ₹${data.estimated_price}</span>
+        <span class="${colorClass} text-base italic leading-relaxed">"${data.roast}"</span>
+    `;
+
+    // Show Feedback
+    setTimeout(() => {
+        feedback.classList.remove('hidden');
+        feedback.classList.add('flex');
+    }, 1000);
 }
 
-function convertToBase64(file) {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.readAsDataURL(file);
-    });
+// --- 5. FEEDBACK LOOP ---
+function handleFeedback(answer) {
+    const section = document.getElementById('feedback-section');
+    if (answer === 'yes') {
+        section.innerHTML = `<span class="text-xs text-emerald-400 font-bold tracking-widest animate-pulse">PURCHASE RECORDED</span>`;
+        // In a real app, we would deduct from wallet here
+    } else {
+        section.innerHTML = `<span class="text-xs text-blue-400 font-bold tracking-widest animate-pulse">SAVINGS RECORDED</span>`;
+    }
 }
-
-// Initialize on Load
-window.onload = runSync;
