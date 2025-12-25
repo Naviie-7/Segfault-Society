@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twin Pulse | Mindful Design</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* --- AURORA BACKGROUND ANIMATION --- */
+        .aurora-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.6;
+            animation: float 10s infinite ease-in-out;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #4c1d95; animation-delay: 0s; }
+        .blob-2 { bottom: -10%; right: -10%; width: 600px; height: 600px; background: #be185d; animation-delay: 2s; }
+        .blob-3 { top: 40%; left: 40%; width: 400px; height: 400px; background: #0f766e; animation-delay: 4s; opacity: 0.4; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        /* --- GLASS UI --- */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* --- TYPOGRAPHY --- */
+        .serif-font { font-family: 'Playfair Display', serif; }
+        
+        /* --- SOFT INPUTS --- */
+        .soft-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s ease;
+        }
+        .soft-input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #f472b6;
+            outline: none;
+            box-shadow: 0 0 15px rgba(244, 114, 182, 0.2);
+        }
+
+        /* --- BUTTONS --- */
+        .gradient-btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(167, 139, 250, 0.3);
+        }
+        .gradient-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(167, 139, 250, 0.5);
+            filter: brightness(1.1);
+        }
+        .gradient-btn:disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(0.8); }
+
+        .outline-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+        .outline-btn:hover { background: rgba(255,255,255,0.05); color: white; border-color: white; }
+
+        /* --- EMOJIS & TABS --- */
+        .emoji-btn { 
+            filter: grayscale(100%) opacity(0.4); 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            font-size: 1.6rem; 
+        }
+        .emoji-btn:hover, .emoji-btn.selected { 
+            filter: grayscale(0%) opacity(1); 
+            transform: scale(1.25); 
+        }
+
+        .nav-pill { opacity: 0.6; transition: all 0.3s; position: relative; }
+        .nav-pill.active { opacity: 1; font-weight: 700; background: -webkit-linear-gradient(0deg, #a78bfa, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-pill::after {
+            content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 2px; background: var(--primary-gradient); transition: width 0.3s;
+        }
+        .nav-pill.active::after { width: 100%; }
+
+        /* --- SCROLLBAR --- */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4 md:p-8">
+
+    <div class="aurora-blob blob-1"></div>
+    <div class="aurora-blob blob-2"></div>
+    <div class="aurora-blob blob-3"></div>
+
+    <div id="auth-screen" class="w-full max-w-sm z-50 animate__animated animate__fadeIn">
+        <div class="glass-card rounded-3xl p-10 text-center relative overflow-hidden">
+            <div class="mb-8">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-pink-500 mx-auto flex items-center justify-center mb-4 shadow-lg shadow-pink-500/20">
+                    <i class="fa-solid fa-infinity text-2xl text-white"></i>
+                </div>
+                <h1 class="text-3xl font-light tracking-wide text-white mb-1">Twin Pulse</h1>
+                <p class="text-sm text-slate-400 serif-font italic">Harmonize your decisions.</p>
+            </div>
+            
+            <form id="login-form" class="space-y-5" onsubmit="Auth.login(event)">
+                <input type="email" id="log-email" class="w-full soft-input p-4 rounded-2xl text-sm" placeholder="Email Address" required>
+                <input type="password" id="log-pass" class="w-full soft-input p-4 rounded-2xl text-sm" placeholder="Password" required>
+                <button type="submit" class="w-full py-4 gradient-btn rounded-2xl text-sm shadow-lg">Begin Session</button>
+                <p class="text-xs text-slate-400 mt-6 cursor-pointer hover:text-white transition-colors" onclick="Auth.toggle()">Create a new account</p>
+            </form>
+
+            <form id="signup-form" class="space-y-5 hidden" onsubmit="Auth.signup(event)">
+                <input type="text" id="sign-name" class="w-full soft-input p-4 rounded-2xl text-sm" placeholder="Your Name" required>
+                <input type="email" id="sign-email" class="w-full soft-input p-4 rounded-2xl text-sm" placeholder="Email Address" required>
+                <input type="password" id="sign-pass" class="w-full soft-input p-4 rounded-2xl text-sm" placeholder="Choose Password" required>
+                <button type="submit" class="w-full py-4 gradient-btn rounded-2xl text-sm shadow-lg">Create Account</button>
+                <p class="text-xs text-slate-400 mt-6 cursor-pointer hover:text-white transition-colors" onclick="Auth.toggle()">Back to Login</p>
+            </form>
+            <div id="auth-msg" class="text-center text-xs mt-4 min-h-[20px]"></div>
+        </div>
+    </div>
+
+    <div id="dashboard" class="hidden w-full max-w-6xl animate__animated animate__fadeIn pb-12">
+        
+        <nav class="glass-card rounded-2xl px-6 py-4 mb-8 flex flex-col md:flex-row justify-between items-center gap-4 sticky top-4 z-40 bg-opacity-80">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-sm font-bold shadow-lg">
+                    <span id="user-initial">U</span>
+                </div>
+                <div>
+                    <h2 id="display-name" class="text-white text-lg font-medium">Welcome</h2>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-widest">System Ready</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                 <button id="voice-toggle" onclick="Voice.toggle()" class="w-8 h-8 rounded-full border border-slate-600 flex items-center justify-center text-slate-400 hover:bg-white/10 transition-all" title="Toggle AI Voice">
+                    <i class="fa-solid fa-volume-xmark text-xs"></i>
+                </button>
+                <div class="flex items-center gap-2 bg-slate-900/40 px-4 py-2 rounded-full border border-white/5">
+                    <i class="fa-solid fa-key text-pink-400 text-[10px]"></i>
+                    <input type="password" id="api-key" placeholder="Gemini API Key" class="bg-transparent text-white text-xs outline-none w-32 text-center">
+                </div>
+            </div>
+
+            <div class="flex gap-8">
+                <button onclick="App.switchTab('finance')" id="tab-finance" class="nav-pill active text-sm pb-1">Finance</button>
+                <button onclick="App.switchTab('productivity')" id="tab-productivity" class="nav-pill text-sm pb-1">Focus</button>
+                <button onclick="Auth.logout()" class="text-xs text-slate-500 hover:text-red-400 transition-colors">Logout</button>
+            </div>
+        </nav>
+
+        <div id="view-finance" class="grid grid-cols-1 lg:grid-cols-12 gap-8 animate__animated animate__fadeIn">
+            
+            <div class="lg:col-span-7 space-y-6">
+                <div class="glass-card rounded-3xl p-8 relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-indigo-500 rounded-full blur-3xl opacity-20"></div>
+                    <div class="flex flex-col md:flex-row gap-8 justify-between items-center relative z-10">
+                        <div class="w-full">
+                            <label class="text-xs text-slate-400 uppercase tracking-wider mb-1 block">Current Balance</label>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl text-slate-500 font-light">₹</span>
+                                <input type="number" id="fin-bal" value="10000" class="bg-transparent text-4xl font-light text-white w-full outline-none" onchange="Finance.updateSafe()">
+                            </div>
+                        </div>
+                        <div class="w-[1px] h-12 bg-white/10 hidden md:block"></div>
+                        <div class="w-full">
+                            <label class="text-xs text-pink-400 uppercase tracking-wider mb-1 block">Savings Goal</label>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl text-slate-500 font-light">₹</span>
+                                <input type="number" id="fin-goal" value="2000" class="bg-transparent text-4xl font-light text-pink-300 w-full outline-none" onchange="Finance.updateSafe()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-white/5 flex justify-between items-center">
+                        <span class="text-xs text-slate-500">Available for Spending</span>
+                        <span id="fin-safe" class="text-lg font-medium text-emerald-400">₹8000</span>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-3xl p-8">
+                    <h3 class="text-white/80 text-sm font-medium mb-6">How are you feeling?</h3>
+                    <div class="flex justify-between px-2 mb-8">
+                        <button onclick="Finance.setMood(this, 'Happy')" class="emoji-btn">😃</button>
+                        <button onclick="Finance.setMood(this, 'Excited')" class="emoji-btn">🤩</button>
+                        <button onclick="Finance.setMood(this, 'Neutral')" class="emoji-btn selected">😐</button>
+                        <button onclick="Finance.setMood(this, 'Stressed')" class="emoji-btn">😫</button>
+                        <button onclick="Finance.setMood(this, 'Sad')" class="emoji-btn">😢</button>
+                    </div>
+                    <input type="hidden" id="fin-mood" value="Neutral">
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="text-xs text-slate-400 ml-2">Location / Vibe</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-location-dot absolute left-4 top-4 text-slate-500 text-xs"></i>
+                                <select id="fin-loc" class="w-full soft-input p-3 pl-10 rounded-2xl text-sm appearance-none cursor-pointer">
+                                    <option value="Home">🏠 Relaxing at Home</option>
+                                    <option value="Online Late Night">🌚 Late Night Browsing</option>
+                                    <option value="Shopping Mall">🛍️ Shopping Mall</option>
+                                    <option value="Electronics Store">📱 Tech Store</option>
+                                    <option value="Restaurant/Bar">🍷 Social Outing</option>
+                                    <option value="Travel">✈️ Travel</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs text-slate-400 ml-2">Hourly Value (₹)</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-briefcase absolute left-4 top-4 text-slate-500 text-xs"></i>
+                                <input type="number" id="fin-wage" value="500" class="w-full soft-input p-3 pl-10 rounded-2xl text-sm" placeholder="Hourly Wage">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-3xl p-6">
+                    <div class="flex gap-2 mb-4 bg-black/20 p-1 rounded-full w-fit mx-auto">
+                        <button onclick="Finance.toggleMode('visual')" id="btn-mode-vis" class="px-6 py-2 rounded-full text-xs font-bold bg-white/10 text-white transition-all shadow-md">Visual</button>
+                        <button onclick="Finance.toggleMode('text')" id="btn-mode-txt" class="px-6 py-2 rounded-full text-xs font-bold text-slate-400 hover:text-white transition-all">Manual</button>
+                    </div>
+
+                    <div id="mode-visual" class="animate__animated animate__fadeIn">
+                        <div class="relative w-full h-64 bg-slate-900/50 rounded-2xl overflow-hidden border border-white/5 mb-4 group">
+                            <video id="camera-feed" class="absolute inset-0 w-full h-full object-cover hidden transform scale-x-[-1]" autoplay playsinline></video>
+                            <img id="display-image" class="absolute inset-0 w-full h-full object-contain hidden z-20 bg-slate-900">
+                            
+                            <div id="visual-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-slate-600">
+                                <i class="fa-regular fa-image text-3xl mb-2 opacity-50"></i>
+                                <p class="text-xs font-light">Upload or Snap to Analyze</p>
+                            </div>
+
+                            <button id="btn-capture" onclick="Finance.snapPhoto()" class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-30 w-14 h-14 bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] border-4 border-slate-200 flex items-center justify-center text-black hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-camera"></i>
+                            </button>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <label class="flex-1 cursor-pointer py-3 outline-btn rounded-xl text-xs font-medium text-center hover:bg-white/5 transition-colors">
+                                <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Upload Photo
+                                <input type="file" accept="image/*" class="hidden" onchange="Finance.handleUpload(this)">
+                            </label>
+                            <button onclick="Finance.startCamera()" class="flex-1 py-3 outline-btn rounded-xl text-xs font-medium text-center hover:bg-white/5 transition-colors">
+                                <i class="fa-solid fa-camera mr-2"></i> Open Camera
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="mode-text" class="hidden space-y-3 animate__animated animate__fadeIn">
+                        <input type="text" id="man-name" placeholder="Item Name (e.g. Shoes)" class="w-full soft-input p-4 rounded-2xl text-sm">
+                        <input type="number" id="man-price" placeholder="Price (₹)" class="w-full soft-input p-4 rounded-2xl text-sm">
+                    </div>
+
+                    <button onclick="Finance.analyze()" id="btn-fin-analyze" class="w-full mt-6 py-4 gradient-btn rounded-2xl text-sm shadow-xl hover:shadow-2xl">
+                        Analyze Decision
+                    </button>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5 space-y-6">
+                <div class="glass-card rounded-3xl p-8 min-h-[450px] flex flex-col relative bg-gradient-to-b from-white/5 to-transparent">
+                    <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-6">AI Insight</h3>
+
+                    <div id="fin-idle" class="flex-1 flex flex-col items-center justify-center text-slate-600 opacity-70">
+                        <div class="w-20 h-20 rounded-full border border-slate-700/50 flex items-center justify-center mb-4 animate-pulse">
+                            <i class="fa-solid fa-brain text-2xl"></i>
+                        </div>
+                        <p class="text-xs font-light">Waiting for input...</p>
+                    </div>
+
+                    <div id="fin-result" class="hidden flex-col h-full animate__animated animate__fadeIn">
+                        <div class="flex justify-between items-start mb-1">
+                            <div>
+                                <h2 id="res-name" class="text-2xl font-medium text-white capitalize">Item</h2>
+                                <p id="res-time-cost" class="text-pink-300 text-xs mt-1 font-medium">Cost: 0 hrs of life</p>
+                            </div>
+                            <span id="res-badge" class="px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold uppercase text-white tracking-wide border border-white/10">--</span>
+                        </div>
+                        
+                        <p id="res-price" class="text-4xl font-light text-white mb-6">₹0</p>
+                        
+                        <div class="mb-6">
+                            <div class="flex justify-between text-xs text-slate-400 mb-2">
+                                <span>Impulse Risk</span>
+                                <span id="res-risk-val">0%</span>
+                            </div>
+                            <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div id="res-risk-bar" class="h-full bg-gradient-to-r from-emerald-400 via-yellow-400 to-rose-500 w-0 transition-all duration-1000"></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/5 p-5 rounded-2xl border border-white/5 mb-6 flex-1">
+                            <i class="fa-solid fa-quote-left text-white/20 text-xl mb-2 block"></i>
+                            <p id="res-reason" class="text-sm text-slate-300 font-light leading-relaxed serif-font italic">Analysis pending...</p>
+                        </div>
+
+                        <button id="btn-confirm" onclick="Finance.confirm()" class="w-full py-4 bg-white/10 hover:bg-white/20 text-white font-medium rounded-2xl text-xs uppercase tracking-wider transition-colors" disabled>
+                            Waiting for Verdict
+                        </button>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-3xl p-6 h-48 overflow-hidden flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest">Recent Decisions</h3>
+                        <button onclick="Finance.clearLog()" class="text-[10px] text-pink-400 hover:text-pink-300">Clear</button>
+                    </div>
+                    <div id="tx-log" class="overflow-y-auto space-y-2 pr-2 scroll-smooth"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-productivity" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8 animate__animated animate__fadeIn">
+            <div class="lg:col-span-7 space-y-6">
+                <div class="glass-card rounded-3xl p-8 border-l-4 border-l-violet-400">
+                    <label class="text-xs text-violet-300 font-bold uppercase tracking-widest mb-3 block">Current Focus</label>
+                    <input type="text" id="prod-goal" placeholder="What do you want to achieve?" class="w-full bg-transparent text-2xl font-light text-white outline-none placeholder-slate-600">
+                </div>
+                
+                <div class="glass-card rounded-3xl p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div class="space-y-3">
+                            <label class="text-xs text-slate-400 uppercase tracking-wide">Duration</label>
+                            <div class="flex gap-3">
+                                <input type="number" id="prod-dur-val" placeholder="00" class="w-20 soft-input p-3 rounded-xl text-center font-medium">
+                                <select id="prod-dur-unit" class="flex-1 soft-input p-3 rounded-xl cursor-pointer">
+                                    <option value="mins">Minutes</option>
+                                    <option value="hours">Hours</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <label class="text-xs text-slate-400 uppercase tracking-wide">Previous Activity</label>
+                            <select id="prod-prev" class="w-full soft-input p-3 rounded-xl cursor-pointer">
+                                <option value="Doomscrolling">📱 Doomscrolling (Socials)</option>
+                                <option value="Deep Work">🧠 Deep Focus / Work</option>
+                                <option value="Gaming">🎮 High Stimulation (Gaming)</option>
+                                <option value="Streaming">📺 Passive Watching</option>
+                                <option value="Sleeping">😴 Sleep / Nap</option>
+                                <option value="Exercise">💪 Physical Exercise</option>
+                                <option value="Eating">🥗 Eating</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <div class="flex justify-between mb-3">
+                            <label class="text-xs text-slate-400 uppercase tracking-wide">Energy Level</label>
+                            <span id="lbl-energy" class="text-violet-300 font-medium text-sm">50%</span>
+                        </div>
+                        <input type="range" id="prod-energy" class="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-violet-500" oninput="document.getElementById('lbl-energy').innerText = this.value + '%'">
+                    </div>
+
+                    <button onclick="Productivity.predict()" id="btn-prod" class="w-full py-4 gradient-btn rounded-2xl text-sm shadow-xl hover:shadow-2xl">
+                        Predict Flow State
+                    </button>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5">
+                <div class="glass-card rounded-3xl p-8 h-full flex flex-col items-center justify-center text-center relative overflow-hidden">
+                     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-violet-500/20 rounded-full blur-3xl"></div>
+
+                     <div id="prod-idle" class="z-10 text-slate-500">
+                         <i class="fa-regular fa-clock text-5xl mb-4 opacity-50"></i>
+                         <p class="text-sm font-light">Align your time & energy.</p>
+                     </div>
+
+                     <div id="prod-res" class="hidden w-full text-left z-10 animate__animated animate__fadeInUp">
+                         <div class="flex justify-between items-end mb-2">
+                             <span class="text-xs uppercase text-slate-400 tracking-widest">Success Probability</span>
+                             <span id="prod-prob" class="text-5xl font-light text-white">--%</span>
+                         </div>
+                         
+                         <div class="w-full h-2 bg-slate-800 rounded-full mb-8 overflow-hidden">
+                             <div id="prod-bar" class="h-full bg-gradient-to-r from-violet-400 to-fuchsia-400 w-0 transition-all duration-1000 shadow-[0_0_15px_rgba(167,139,250,0.5)]"></div>
+                         </div>
+
+                         <div class="bg-white/5 border border-white/10 p-6 rounded-2xl relative">
+                             <div class="absolute -top-3 left-6 px-2 bg-[#0f172a] text-[10px] text-violet-300 uppercase tracking-widest font-bold">Guidance</div>
+                             <p id="prod-msg" class="text-sm text-slate-200 font-light leading-relaxed serif-font italic">--</p>
+                             <div class="mt-4 pt-3 border-t border-white/5 text-[10px] text-slate-500 flex justify-between">
+                                <span>Based on your energy & timing</span>
+                                <span id="prod-time-check">--</span>
+                             </div>
+                         </div>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CONFIG = { model: "gemini-2.5-flash" };
+
+        const Voice = {
+            enabled: false,
+            synth: window.speechSynthesis,
+            toggle: () => {
+                Voice.enabled = !Voice.enabled;
+                const btn = document.getElementById('voice-toggle');
+                if(Voice.enabled) {
+                    btn.classList.add('bg-white', 'text-black');
+                    btn.classList.remove('text-slate-400');
+                    btn.innerHTML = '<i class="fa-solid fa-volume-high text-xs"></i>';
+                    Voice.speak("Voice guidance enabled.");
+                } else {
+                    btn.classList.remove('bg-white', 'text-black');
+                    btn.classList.add('text-slate-400');
+                    btn.innerHTML = '<i class="fa-solid fa-volume-xmark text-xs"></i>';
+                    Voice.synth.cancel();
+                }
+            },
+            speak: (text) => {
+                if(!Voice.enabled) return;
+                Voice.synth.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.pitch = 1; u.rate = 1.0; 
+                // Look for a soft/pleasant voice
+                const voices = Voice.synth.getVoices();
+                const niceVoice = voices.find(v => v.name.includes('Samantha') || v.name.includes('Google US English')) || voices[0];
+                if(niceVoice) u.voice = niceVoice;
+                Voice.synth.speak(u);
+            }
+        };
+
+        const Auth = {
+            user: null,
+            init: () => { 
+                const u = localStorage.getItem('twinUser'); 
+                if(u){ Auth.user=JSON.parse(u); Auth.loadDash(); } 
+            },
+            toggle: () => { 
+                document.getElementById('login-form').classList.toggle('hidden'); 
+                document.getElementById('signup-form').classList.toggle('hidden'); 
+                document.getElementById('auth-msg').innerText=""; 
+            },
+            signup: (e) => {
+                e.preventDefault();
+                const u = { name: document.getElementById('sign-name').value, email: document.getElementById('sign-email').value, pass: document.getElementById('sign-pass').value };
+                let db = JSON.parse(localStorage.getItem('twinDB'))||[];
+                if(db.find(x=>x.email===u.email)) return Auth.err("Account already exists.");
+                db.push(u); localStorage.setItem('twinDB', JSON.stringify(db));
+                Auth.err("Account created. Please login.", "text-emerald-400"); Auth.toggle();
+            },
+            login: (e) => {
+                e.preventDefault();
+                const e_in = document.getElementById('log-email').value, p_in = document.getElementById('log-pass').value;
+                let db = JSON.parse(localStorage.getItem('twinDB'))||[];
+                const u = db.find(x => x.email === e_in && x.pass === p_in);
+                if(u) { Auth.user=u; localStorage.setItem('twinUser', JSON.stringify(u)); Auth.loadDash(); } else Auth.err("Incorrect email or password.");
+            },
+            loadDash: () => { 
+                document.getElementById('auth-screen').classList.add('hidden'); 
+                document.getElementById('dashboard').classList.remove('hidden'); 
+                document.getElementById('display-name').innerText = `Hello, ${Auth.user.name.split(' ')[0]}`;
+                document.getElementById('user-initial').innerText = Auth.user.name.charAt(0).toUpperCase(); 
+                Finance.loadLog(); Finance.updateSafe();
+            },
+            logout: () => { localStorage.removeItem('twinUser'); location.reload(); },
+            err: (m, c="text-red-400") => { const el=document.getElementById('auth-msg'); el.innerText=m; el.className=`text-center text-xs mt-4 ${c}`; }
+        };
+
+        const App = {
+            switchTab: (t) => {
+                document.querySelectorAll('.nav-pill').forEach(b => b.classList.remove('active'));
+                document.getElementById(`tab-${t}`).classList.add('active');
+                document.getElementById('view-finance').classList.toggle('hidden', t!=='finance');
+                document.getElementById('view-productivity').classList.toggle('hidden', t!=='productivity');
+            },
+            askGemini: async (prompt, img=null) => {
+                const key = document.getElementById('api-key').value;
+                if(!key) { Voice.speak("Please enter your API key first."); throw new Error("API Key required"); }
+                const payload = { contents: [{ parts: [{ text: prompt }, ...(img ? [{ inline_data: { mime_type: "image/jpeg", data: img } }] : [])] }] };
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.model}:generateContent?key=${key}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+                const data = await res.json();
+                if(data.error) throw new Error(data.error.message);
+                return JSON.parse(data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim());
+            }
+        };
+
+        const Finance = {
+            mode: 'visual', imgBase64: null, lastRes: null, stream: null,
+            updateSafe: () => {
+                const b = parseFloat(document.getElementById('fin-bal').value)||0, g = parseFloat(document.getElementById('fin-goal').value)||0, s = b-g;
+                const el = document.getElementById('fin-safe'); 
+                el.innerText = s<0 ? `Deficit: ₹${Math.abs(s)}` : `₹${s}`; 
+                el.className = s<0 ? "text-lg font-medium text-rose-400" : "text-lg font-medium text-emerald-400";
+            },
+            setMood: (btn, m) => { document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); document.getElementById('fin-mood').value = m; },
+            toggleMode: (m) => {
+                Finance.mode = m;
+                // UI Toggle
+                const btnVis = document.getElementById('btn-mode-vis');
+                const btnTxt = document.getElementById('btn-mode-txt');
+                if(m === 'visual') {
+                    btnVis.classList.replace('text-slate-400', 'text-white'); btnVis.classList.add('bg-white/10');
+                    btnTxt.classList.replace('text-white', 'text-slate-400'); btnTxt.classList.remove('bg-white/10');
+                } else {
+                    btnTxt.classList.replace('text-slate-400', 'text-white'); btnTxt.classList.add('bg-white/10');
+                    btnVis.classList.replace('text-white', 'text-slate-400'); btnVis.classList.remove('bg-white/10');
+                }
+                document.getElementById('mode-visual').classList.toggle('hidden', m!=='visual');
+                document.getElementById('mode-text').classList.toggle('hidden', m!=='text');
+                if(m==='text') Finance.stopCamera();
+            },
+            handleUpload: (input) => {
+                if(input.files && input.files[0]) {
+                    Finance.stopCamera(); 
+                    const r = new FileReader();
+                    r.onload = (e) => {
+                        Finance.imgBase64 = e.target.result.split(',')[1];
+                        const display = document.getElementById('display-image');
+                        display.src = e.target.result; display.classList.remove('hidden');
+                        document.getElementById('visual-placeholder').classList.add('hidden');
+                        document.getElementById('camera-feed').classList.add('hidden'); document.getElementById('btn-capture').classList.add('hidden');
+                    };
+                    r.readAsDataURL(input.files[0]);
+                }
+            },
+            startCamera: async () => {
+                try {
+                    const video = document.getElementById('camera-feed');
+                    Finance.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                    video.srcObject = Finance.stream; video.classList.remove('hidden');
+                    document.getElementById('display-image').classList.add('hidden'); document.getElementById('visual-placeholder').classList.add('hidden'); document.getElementById('btn-capture').classList.remove('hidden');
+                } catch(e) { alert("Camera access required."); }
+            },
+            snapPhoto: () => {
+                if(!Finance.stream) return;
+                const video = document.getElementById('camera-feed');
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                const dataUrl = canvas.toDataURL('image/jpeg');
+                Finance.imgBase64 = dataUrl.split(',')[1];
+                const display = document.getElementById('display-image');
+                display.src = dataUrl; display.classList.remove('hidden');
+                Finance.stopCamera(); video.classList.add('hidden'); document.getElementById('btn-capture').classList.add('hidden');
+            },
+            stopCamera: () => { if(Finance.stream) { Finance.stream.getTracks().forEach(t => t.stop()); Finance.stream = null; } },
+            analyze: async () => {
+                const btn = document.getElementById('btn-fin-analyze');
+                try {
+                    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Thinking...'; btn.disabled = true;
+                    Voice.speak("Analyzing your decision.");
+
+                    const bal = document.getElementById('fin-bal').value, goal = document.getElementById('fin-goal').value;
+                    const mood = document.getElementById('fin-mood').value, loc = document.getElementById('fin-loc').value;
+                    let txt = "Analyze visual.";
+                    if(Finance.mode === 'text') txt = `Item: ${document.getElementById('man-name').value}, Price: ${document.getElementById('man-price').value}`;
+                    else if(!Finance.imgBase64) throw new Error("Please select an image.");
+
+                    const p = `Persona: Empathetic, Minimalist Financial Wellness Coach. 
+                    Context: Balance ₹${bal}, Goal ₹${goal}, Mood ${mood}, Loc ${loc}, Input: ${txt}. 
+                    Task: Identify item & price. Calc Impulse Risk(0-100).
+                    Rules: 
+                    1. If (Balance-Price < Goal) VERDICT="DENIED". Reason: Gentle reminder about the savings goal.
+                    2. If Risk>70 VERDICT="CAUTION".
+                    3. Else "APPROVED".
+                    Output JSON only: { "item": "str", "price": num, "risk": num, "verdict": "APPROVED"|"DENIED"|"CAUTION", "reason": "gentle_mindful_sentence" }`;
+
+                    const res = await App.askGemini(p, Finance.mode==='visual'?Finance.imgBase64:null);
+                    Finance.lastRes = res;
+
+                    document.getElementById('fin-idle').classList.add('hidden');
+                    document.getElementById('fin-result').classList.remove('hidden');
+                    document.getElementById('fin-result').classList.add('flex');
+
+                    document.getElementById('res-name').innerText = res.item;
+                    document.getElementById('res-price').innerText = `₹${res.price}`;
+                    document.getElementById('res-risk-val').innerText = res.risk+"%";
+                    document.getElementById('res-risk-bar').style.width = res.risk+"%";
+                    document.getElementById('res-reason').innerText = `"${res.reason}"`;
+
+                    const wage = parseFloat(document.getElementById('fin-wage').value) || 1;
+                    const hours = (res.price / wage).toFixed(1);
+                    document.getElementById('res-time-cost').innerText = `${hours} hrs of work required`;
+
+                    const badge = document.getElementById('res-badge');
+                    const conf = document.getElementById('btn-confirm');
+                    
+                    if(res.verdict==='APPROVED'){
+                        badge.innerText = "Mindful Choice"; badge.className="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full text-[10px] font-bold uppercase tracking-wide";
+                        conf.disabled=false; conf.innerText="Confirm Purchase"; conf.className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-medium rounded-2xl text-xs uppercase tracking-wider transition-colors shadow-lg shadow-emerald-500/20";
+                        Voice.speak(`This looks good. ${res.reason}`);
+                    } else if(res.verdict==='DENIED') {
+                        badge.innerText = "Beyond Goal"; badge.className="px-3 py-1 bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-full text-[10px] font-bold uppercase tracking-wide";
+                        conf.disabled=true; conf.innerText="Purchase Blocked"; conf.className="w-full py-4 bg-white/5 text-slate-500 font-medium rounded-2xl text-xs uppercase tracking-wider cursor-not-allowed";
+                        Voice.speak(`I'd advise against this. ${res.reason}`);
+                    } else {
+                        badge.innerText = "High Impulse"; badge.className="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full text-[10px] font-bold uppercase tracking-wide";
+                        conf.disabled=false; conf.innerText="Proceed with Caution"; conf.className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-white font-medium rounded-2xl text-xs uppercase tracking-wider transition-colors shadow-lg shadow-amber-500/20";
+                        Voice.speak(`Be careful. ${res.reason}`);
+                    }
+                } catch(e) { alert(e.message); } finally { btn.innerText = "Analyze Decision"; btn.disabled = false; }
+            },
+            confirm: () => {
+                if(!Finance.lastRes) return;
+                const b = parseFloat(document.getElementById('fin-bal').value), n = b - Finance.lastRes.price;
+                document.getElementById('fin-bal').value = n; Finance.updateSafe();
+                const log = JSON.parse(localStorage.getItem('twinTxLog'))||[];
+                log.unshift({i:Finance.lastRes.item, p:Finance.lastRes.price});
+                localStorage.setItem('twinTxLog', JSON.stringify(log));
+                Finance.loadLog();
+                const btn = document.getElementById('btn-confirm');
+                btn.disabled=true; btn.innerText="Saved to Journal";
+                Voice.speak("Transaction recorded.");
+            },
+            loadLog: () => {
+                const log = JSON.parse(localStorage.getItem('twinTxLog'))||[];
+                const c = document.getElementById('tx-log'); c.innerHTML="";
+                if(!log.length) c.innerHTML = `<p class="text-center text-xs text-slate-500 mt-6 italic">No recent activity.</p>`;
+                log.forEach(x => { c.innerHTML += `<div class="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors"><span class="text-sm text-slate-200">${x.i}</span><span class="text-xs text-rose-300 font-medium">-₹${x.p}</span></div>`; });
+            },
+            clearLog: () => { localStorage.removeItem('twinTxLog'); Finance.loadLog(); }
+        };
+
+        const Productivity = {
+            predict: async () => {
+                const btn = document.getElementById('btn-prod');
+                const durVal = document.getElementById('prod-dur-val').value;
+                const durUnit = document.getElementById('prod-dur-unit').value;
+                const goal = document.getElementById('prod-goal').value;
+                if(!durVal || !goal) return alert("Please fill in your goal details.");
+                try {
+                    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Aligning...'; btn.disabled = true;
+                    Voice.speak("Checking your flow state probability.");
+                    
+                    const now = new Date(); const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    const p = `Persona: Calm Productivity Mentor.
+                    Context: Time ${timeString}, Goal "${goal}", Duration ${durVal} ${durUnit}, Energy ${document.getElementById('prod-energy').value}%, Prev Activity "${document.getElementById('prod-prev').value}".
+                    Task: Predict Success Prob (0-100%).
+                    Output JSON: { "prob": number, "msg": "calm_encouraging_advice", "time_analysis": "str" }`;
+                    
+                    const res = await App.askGemini(p);
+                    document.getElementById('prod-idle').classList.add('hidden');
+                    document.getElementById('prod-res').classList.remove('hidden');
+                    document.getElementById('prod-prob').innerText = res.prob+"%";
+                    document.getElementById('prod-bar').style.width = res.prob+"%";
+                    document.getElementById('prod-msg').innerText = `"${res.msg}"`;
+                    document.getElementById('prod-time-check').innerText = `Checked at ${timeString}`;
+                    Voice.speak(`Probability is ${res.prob} percent. ${res.msg}`);
+                } catch(e) { alert(e.message); } finally { btn.innerText = "Predict Flow State"; btn.disabled = false; }
+            }
+        };
+
+        Auth.init();
+    </script>
+</body>
+</html>
