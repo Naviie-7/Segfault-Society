@@ -411,10 +411,16 @@
                         <option value="gemini-2.0-flash-exp">Flash 2.0 (Exp)</option>
                     </select>
                 </div>
-                <div class="flex items-center gap-2 bg-slate-900/40 px-4 py-2 rounded-full border border-white/5">
+                <div class="flex items-center gap-2 bg-slate-900/40 px-3 py-2 rounded-full border border-white/5">
                     <i class="fa-solid fa-key text-pink-400 text-[10px]"></i>
-                    <input type="password" id="api-key" placeholder="Gemini API Key" class="bg-transparent text-white text-xs outline-none w-32 text-center">
+                    <input type="password" id="api-key" placeholder="Gemini API Key" class="bg-transparent text-white text-xs outline-none w-28 text-center" onchange="API.save()">
+                    <button onclick="API.clear()" class="w-5 h-5 rounded-full bg-slate-700/50 hover:bg-slate-600 flex items-center justify-center text-slate-400 hover:text-white transition-all text-[10px]" title="Clear API Key">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
                 </div>
+                <button onclick="Auth.resetData()" class="text-xs text-slate-500 hover:text-amber-400 transition-colors" title="Reset all data">
+                    <i class="fa-solid fa-rotate-left mr-1"></i>Reset
+                </button>
                 <button onclick="Auth.logout()" class="text-xs text-slate-500 hover:text-red-400 transition-colors">Logout</button>
             </div>
         </nav>
@@ -1038,6 +1044,28 @@
         console.log("Script loading...");
         const CONFIG = { model: "gemini-2.5-flash" };
 
+        const API = {
+            save: () => {
+                const key = document.getElementById('api-key').value;
+                if(key && key.trim()) {
+                    localStorage.setItem('twinApiKey', key.trim());
+                    App.showToast("API key saved! ✓", "success", 2000);
+                }
+            },
+            load: () => {
+                const key = localStorage.getItem('twinApiKey');
+                if(key) {
+                    document.getElementById('api-key').value = key;
+                }
+            },
+            clear: () => {
+                localStorage.removeItem('twinApiKey');
+                document.getElementById('api-key').value = '';
+                App.showToast("API key cleared", "info", 2000);
+            }
+        };
+
+
         const WelcomeTutorial = {
             show: () => {
                 const dontShow = localStorage.getItem('twinDontShowWelcome');
@@ -1102,6 +1130,18 @@
                 Auth.user = demoUser;
                 localStorage.setItem('twinUser', JSON.stringify(demoUser));
                 
+                const demoStats = {
+                    totalSaved: 12450,
+                    declined: 8,
+                    streak: 3,
+                    successRate: 73,
+                    analyses: 11
+                };
+                localStorage.setItem('twinStats', JSON.stringify(demoStats));
+                
+                const demoBadges = ['first-decline', '5-streak'];
+                localStorage.setItem('twinBadges', JSON.stringify(demoBadges));
+                
                 localStorage.setItem('twinTxLog', JSON.stringify([
                     {i:"Gaming Headset", p:2500},
                     {i:"Protein Shake", p:1200},
@@ -1111,8 +1151,8 @@
                 Auth.loadDash();
                 
                 setTimeout(() => {
-                    alert("🎉 Welcome to Demo Mode!\n\nExplore all features with sample data.\nYour demo session data will be cleared when you logout.");
-                }, 500);
+                    App.showToast("🎉 Demo Mode! Explore features with sample data. Add API key to use AI.", "info", 5000);
+                }, 800);
             },
             signup: (e) => {
                 try {
@@ -1163,6 +1203,7 @@
                 document.getElementById('display-name').innerText = `Hello, ${Auth.user.name.split(' ')[0]}`;
                 document.getElementById('user-initial').innerText = Auth.user.name.charAt(0).toUpperCase(); 
                 
+                API.load();
                 Finance.loadBalance();
                 Finance.loadLog();
                 Finance.updateSafe();
@@ -1175,33 +1216,21 @@
                 setTimeout(() => WelcomeTutorial.show(), 800);
             },
             logout: () => { localStorage.removeItem('twinUser'); location.reload(); },
+            resetData: () => {
+                if(confirm('⚠️ Reset all data?\n\nThis will clear:\n• All statistics\n• All badges\n• Transaction history\n• Balance & goal\n\nYour account and API key will remain.\n\nContinue?')) {
+                    localStorage.removeItem('twinStats');
+                    localStorage.removeItem('twinBadges');
+                    localStorage.removeItem('twinTxLog');
+                    localStorage.removeItem('twinFinance');
+                    App.showToast('All data reset! Starting fresh.', 'success', 3000);
+                    setTimeout(() => location.reload(), 1000);
+                }
+            },
             showMsg: (form, msg, colorClass) => { 
                 const el = document.getElementById(`${form}-msg`); 
                 el.innerText = msg; 
                 el.className = `text-center text-xs mt-4 ${colorClass}`; 
             },
-            demoLogin: () => {
-                Auth.user = {
-                    name: "Demo User",
-                    email: "demo@twinpulse.ai"
-                };
-                localStorage.setItem('twinUser', JSON.stringify(Auth.user));
-                
-                const demoStats = {
-                    totalSaved: 12450,
-                    declined: 8,
-                    streak: 3,
-                    successRate: 73,
-                    analyses: 11
-                };
-                localStorage.setItem('twinStats', JSON.stringify(demoStats));
-                
-                const demoBadges = ['first-decline', '5-streak'];
-                localStorage.setItem('twinBadges', JSON.stringify(demoBadges));
-                
-                App.showToast("Demo mode activated with pre-loaded data! Add your API key to use AI features.", "info", 4000);
-                Auth.loadDash();
-            }
         };
 
         const App = {
